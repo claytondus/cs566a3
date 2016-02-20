@@ -1,3 +1,1 @@
-<cfdbinfo datasource="cs566" name="dtables" type="tables">
-
-<cfdump var="#dtables#">
+<h1>CS566 Home</h1>
