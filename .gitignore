@@ -1,3 +1,5 @@
 box
 *.log
 h2/*
+*.pyc
+
