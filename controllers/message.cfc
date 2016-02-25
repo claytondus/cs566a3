@@ -16,9 +16,9 @@ component {
     if (rc.method eq "POST") {
       query name="rc.add" datasource="cs566" {
         echo("INSERT INTO Messages SET message = ");
-        queryparam value=esapiEncode('html',rc.message);
+        queryparam value=rc.message;
         echo(", title = ");
-        queryparam value=esapiEncode('html',rc.title);
+        queryparam value=rc.title;
         echo(", username = ");
         queryparam value=session.user;
         echo(", secret = ");

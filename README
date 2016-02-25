@@ -1,0 +1,62 @@
+COSC 566 Assignment 3
+Clayton Davis
+UTK ID: cdavi151
+==================
+
+This application was built with CFML (ColdFusion Markup Language) using
+Framework/1 (FW/1).  FW/1 is a conventions-based MVC framework.  To start the
+application, run install.sh followed by ./box server start.  A JVM must be
+available.
+
+Application.cfc contains the front controller, which contains the global
+application lifecycle methods, database setup, and the functions which process
+"knocks." MVC capability is inherited from the base framework.one component.
+A datasource definition links to an embedded H2 database instance, "cs566".
+When the application starts, the required Users and Messages tables are created
+if they do not exist.  Users contains fields for the user ID, name, and password
+hash (SHA-512 without salt.)  Messages contains fields for message ID, title,
+message content, username, and a boolean for indicating "secret" status.
+before() is invoked prior to the controller method on every request. Default
+values for the knock sequence, the user's knock history, and secret mode are set
+up here, and processKnock() is called.
+
+Upon login, the session.knockSequence array is initialized from the username.
+This is interpreted as a queue of integer actionIds corresponding to the correct
+sequence of requests.  The application.knockPages array contains the lookup between
+request paths and these actionIds.
+
+processKnock() verifies that a user is logged in and that secret mode is not
+enabled, before looking up the current request path from the CGI PATH_INFO
+variable.  The session.knockHistory array is interpreted as a queue containing
+the four most recent requests. If the current request path is a knockable path, it
+is decoded and the actionId added to the knockHistory queue.  If the queue at this time is equal to the
+session.knockSequence array, a valid knock sequence has been entered, and
+the session.secret variable is set to 1.  This boolean is used in the SQL queries
+and view templates to declare "secret" mode.
+
+Request controllers are located in the "controllers" directory. Each controller
+is defined by a .cfc file, one each for /user and /message.  user.cfc contains
+three methods, register(), login(), and logout(), and message.cfc contains list() and add().
+Upon accessing a URL such as /user/register, the controller method user.register()
+is executed, and the request context (the struct, rc) is filled with the URL and
+form parameter scopes. After the controller method returns, the corresponding
+view template (/views/user/register.cfm) is executed and receives the rc struct.
+
+When a POST to the user controller is received, the user.register() action verifies that the username does
+not already exist and that the password fields are equal.  If these conditions
+are met, the password is hashed and the user record is inserted into the Users
+table, and a success message is presented.  If a GET is received, only the
+register form is displayed.
+The user.login() action hashes the password, and retrieves the user record from
+the database with this hash and username.  If a record is received, the username
+is converted to a knock sequence and stored in the session scope. If the request
+is a GET and a user is already logged in, only the username is displayed.
+logout() clears the session.secret and session.user variables, and resets the
+knockSequence and knockHistory variables to default values.
+
+Both message actions verify that session.user is not blank, indicating a user
+is logged in.  The list() action selects all Message records matching the
+current secret state, and displays them one by one.  The add() action inserts
+the form fields, along with the username and secret state, if the
+request is a POST.  In every case, the Add Message form is displayed at the end
+of the messages.

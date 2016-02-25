@@ -8,9 +8,6 @@ component {
   function register(struct rc) {
     rc.pagetitle = "Register User";
     if(rc.method eq "POST") {
-      rc.username = esapiEncode('html',rc.username);
-      rc.password = esapiEncode('html',rc.password);
-      rc.password_confirm = esapiEncode('html',rc.password_confirm);
       query name="checkName" datasource="cs566" {
         echo("select * from Users where username = ");
         queryparam value=rc.username;
@@ -36,8 +33,7 @@ component {
   function login(struct rc) {
     rc.pagetitle = "Login";
     if(rc.method eq "POST") {
-      rc.username = esapiEncode('html',rc.username);
-      rc.hash = hash(esapiEncode('html',rc.password),"sha-512");
+      rc.hash = hash(rc.password,"sha-512");
       query name="checkPassword" datasource="cs566" {
         echo("select * from Users where username = ");
         queryparam value=rc.username;
@@ -63,7 +59,7 @@ component {
     session.user = "";
     session.secret = 0;
     session.knockSequence = [-1,-1,-1,-1];
-    session.knockHistory = [-1,-1,-1,-1];
+    session.knockHistory = [-2,-2,-2,-2];
   }
 
 }
